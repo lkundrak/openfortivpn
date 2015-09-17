@@ -120,17 +120,8 @@ int http_receive(struct tunnel *tunnel, char **response)
 	return 1;
 }
 
-/*
- * Sends and receives data from the HTTP server.
- *
- * @param[out] response  if not NULL, this pointer is set to reference
- *                       the new allocated buffer containing the data
- *                       sent by the server
- * @return     1         in case of success
- *             < 0       in case of error
- */
-static int http_request(struct tunnel *tunnel, const char *method,
-			const char *uri, const char *data, char **response)
+static int do_http_request(struct tunnel *tunnel, const char *method,
+			   const char *uri, const char *data, char **response)
 {
 	int ret;
 	char template[] =
@@ -152,6 +143,27 @@ static int http_request(struct tunnel *tunnel, const char *method,
 		return ret;
 
 	return http_receive(tunnel, response);
+}
+/*
+ * Sends and receives data from the HTTP server.
+ *
+ * @param[out] response  if not NULL, this pointer is set to reference
+ *                       the new allocated buffer containing the data
+ *                       sent by the server
+ * @return     1         in case of success
+ *             < 0       in case of error
+ */
+static int http_request(struct tunnel *tunnel, const char *method,
+			const char *uri, const char *data, char **response)
+{
+	int ret = do_http_request (tunnel, method, uri, data, response);
+
+	if (ret != ERR_HTTP_SSL)
+		return ret;
+
+	ssl_connect (tunnel);
+
+	return do_http_request (tunnel, method, uri, data, response);
 }
 
 /*
