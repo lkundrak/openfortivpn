@@ -188,6 +188,7 @@ static int do_http_request(struct tunnel *tunnel, const char *method,
 		"Content-Length: %d\r\n"
 		"\r\n%s";
 
+	log_debug("Requesting %s resource\n", uri);
 	ret = http_send(tunnel, template, method, uri,
 			tunnel->config->gateway_host,
 			tunnel->config->gateway_port, tunnel->config->cookie,

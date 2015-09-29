@@ -102,6 +102,9 @@ static inline int safe_ssl_read(SSL *ssl, uint8_t *buf, int bufsize)
 	int ret;
 
 	ret = SSL_read(ssl, buf, bufsize);
+	log_debug("safe_ssl_read: read %d octets\n", ret);
+	if (ret > 0)
+		log_packet("safe_ssl_read: ", ret, buf);
 	if (ret > 0)
 		return ret;
 
@@ -143,7 +146,10 @@ static inline int safe_ssl_write(SSL *ssl, const uint8_t *buf, int n)
 {
 	int ret;
 
+	if (n > 0)
+		log_packet("safe_ssl_write: ", n, buf);
 	ret = SSL_write(ssl, buf, n);
+	log_debug("safe_ssl_write: wrote %d octets\n", ret);
 	if (ret > 0)
 		return ret;
 
